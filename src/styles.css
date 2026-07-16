@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -60,7 +62,7 @@
   --color-mustard: var(--mustard);
 
   --font-display: "Cormorant Garamond", serif;
-  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   --font-script: "Caveat Brush", cursive;
 }
 
@@ -210,18 +212,22 @@
   align-items: center;
   justify-content: center;
   gap: 1.25rem;
-  font-family: var(--font-display);
+
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
   font-weight: 300;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+
   color: white;
   font-size: clamp(1.5rem, 3.5vw, 2.75rem);
 
   &::before,
   &::after {
     content: "";
-    height: 1px;
+    display: block;
+    flex-shrink: 0;
     width: clamp(2rem, 8vw, 5rem);
+    height: 1px;
     background: currentColor;
     opacity: 0.7;
   }
