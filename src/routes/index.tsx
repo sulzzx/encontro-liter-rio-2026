@@ -380,10 +380,20 @@ function Hero() {
   );
 }
 
-function SectionHead({ title }: { title: string }) {
+function SectionHead({
+  title,
+  className = "",
+}: {
+  title: string;
+  className?: string;
+}) {
   return (
     <div className="bg-ink py-8">
-      <h2 className="section-title">{title}</h2>
+      <h2
+        className={`section-title font-['Nunito_Sans'] ${className}`}
+      >
+        {title}
+      </h2>
     </div>
   );
 }
@@ -1047,7 +1057,7 @@ function Footer() {
 
             <div className="flex min-h-24 items-center justify-center">
               <img
-                src={formacerta}
+                src={formaCertaLogo}
                 alt="Forma Certa"
                 loading="lazy"
                 className="h-24 w-28 object-contain"
@@ -1062,7 +1072,7 @@ function Footer() {
 
             <div className="flex min-h-24 items-center justify-center">
               <img
-                src={sinespsvg}
+                src={sinespLogo}
                 alt="SINESP"
                 loading="lazy"
                 className="h-20 w-28 object-contain"
