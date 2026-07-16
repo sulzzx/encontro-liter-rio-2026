@@ -5,6 +5,7 @@ import {
   MapPin,
   ChevronDown,
   Plus,
+  ArrowLeft,
   ArrowRight,
   Search,
   Ticket,
@@ -12,8 +13,14 @@ import {
   Facebook,
   Youtube,
 } from "lucide-react";
+import { useRef, useState } from "react";
+
 
 import heroImg from "@/assets/hero-carolina.png";
+import sinespsvg from "@/assets/sinesp.svg";
+import formacerta from "@/assets/forma-certa.svg";
+import fraseLivrariasImg from "@/assets/seila-123.jpeg";
+import encontro2026 from "@/assets/encontro-2026.png";
 import author1 from "@/assets/itamar-vieira-jr.png";
 import author2 from "@/assets/tom-farias.png";
 import author3 from "@/assets/vera-eunice.png";
@@ -47,6 +54,7 @@ import edemilsonEquipeImg from "@/assets/edemilson-tavares.png";
 import hectorEquipeImg from "@/assets/hector-boss.png";
 import formaCertaLogo from "@/assets/forma-certa.png";
 import sinespLogo from "@/assets/sinesp.png";
+import logo_evento from "@/assets/logo_evento.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -321,27 +329,22 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
       <div className="relative mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl grid-cols-1 items-center gap-10 px-6 py-16 lg:grid-cols-[1.1fr_1fr] lg:px-10">
         <div className="order-2 lg:order-1">
-          <p
-            className="font-script text-6xl leading-none text-[oklch(0.55_0.22_25)] drop-shadow-[0_4px_0_rgba(0,0,0,0.35)] sm:text-7xl md:text-8xl"
-          >
-            Carolina
-          </p>
-          <p className="mt-1 font-script text-3xl text-[oklch(0.55_0.22_255)] drop-shadow-[0_2px_0_rgba(0,0,0,0.35)] sm:text-4xl">
-            além do quarto
-          </p>
+        <img
+          src={logo_evento}
+          alt="Carolina Além do Quarto"
+          loading="eager"
+          className="w-[420px] sm:w-[520px] md:w-[620px] h-auto drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+          />
         </div>
-
         <div className="order-1 space-y-6 lg:order-2 lg:justify-self-end">
-          <div className="max-w-md rounded-md border-2 border-white/90 bg-black/10 p-6 text-white backdrop-blur-sm">
-            <BookOpen className="mb-3 h-10 w-10" strokeWidth={1.5} />
-            <h1 className="font-sans text-4xl font-black leading-[0.95] tracking-wide sm:text-5xl">
-              ENCONTRO
-              <br />
-              LITERÁRIO
-              <br />
-              <span className="text-3xl sm:text-4xl">2026</span>
-            </h1>
-          </div>
+          <div className="max-w-md">
+          <img
+            src={encontro2026}
+            alt="Encontro Literário 2026"
+            loading="eager"
+            className="w-full h-auto drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]"
+          />
+        </div>
 
           <div className="flex max-w-md items-center gap-3 text-white">
             <Calendar className="h-6 w-6 shrink-0" strokeWidth={1.5} />
@@ -394,36 +397,171 @@ function SideLabel({ children }: { children: string }) {
 }
 
 function Convidados() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  function getCardStep() {
+    const carousel = carouselRef.current;
+
+    if (!carousel) return 0;
+
+    const firstCard =
+      carousel.querySelector<HTMLElement>("[data-carousel-card]");
+
+    if (!firstCard) return 0;
+
+    const styles = window.getComputedStyle(carousel);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || "0");
+
+    return firstCard.offsetWidth + gap;
+  }
+
+  function updateActiveIndex() {
+    const carousel = carouselRef.current;
+
+    if (!carousel) return;
+
+    const step = getCardStep();
+
+    if (!step) return;
+
+    const index = Math.round(carousel.scrollLeft / step);
+
+    setActiveIndex(Math.min(index, convidados.length - 1));
+  }
+
+  function goToPrevious() {
+    const carousel = carouselRef.current;
+
+    if (!carousel) return;
+
+    const step = getCardStep();
+
+    carousel.scrollBy({
+      left: -step,
+      behavior: "smooth",
+    });
+  }
+
+  function goToNext() {
+    const carousel = carouselRef.current;
+
+    if (!carousel) return;
+
+    const step = getCardStep();
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    const reachedEnd = carousel.scrollLeft >= maxScroll - 5;
+
+    if (reachedEnd) {
+      carousel.scrollTo({
+        left: 0,
+        behavior: "smooth",
+      });
+
+      setActiveIndex(0);
+      return;
+    }
+
+    carousel.scrollBy({
+      left: step,
+      behavior: "smooth",
+    });
+  }
+
+  function scrollToPosition(position: number) {
+    const carousel = carouselRef.current;
+
+    if (!carousel) return;
+
+    const step = getCardStep();
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+
+    carousel.scrollTo({
+      left: Math.min(position * step, maxScroll),
+      behavior: "smooth",
+    });
+  }
+
+  const indicatorPositions = [0, Math.max(convidados.length - 4, 1)];
+
+  const activeIndicator =
+    activeIndex >= indicatorPositions[1] ? 1 : 0;
+
   return (
     <section id="convidados">
       <SectionHead title="Convidados" />
-      <div className="relative bg-orange-band py-16">
+
+      <div className="relative overflow-hidden bg-orange-band py-16">
         <SideLabel>CONVIDADOS</SideLabel>
-        <div className="mx-auto max-w-7xl px-6 lg:px-16">
-          <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {convidados.map((c) => (
-              <figure key={c.name} className="w-[240px] shrink-0 snap-start sm:w-[280px]">
-                <div className="relative overflow-hidden rounded-2xl bg-white shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]">
-                  <img src={c.img} alt={c.name} width={512} height={768} loading="lazy" className="aspect-[3/4] w-full object-cover" />
+
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-16">
+          <button
+            type="button"
+            onClick={goToPrevious}
+            aria-label="Convidado anterior"
+            className="absolute left-2 top-[40%] z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white text-white transition hover:bg-white hover:text-orange-band lg:left-4"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+
+          <div
+            ref={carouselRef}
+            onScroll={updateActiveIndex}
+            className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-8 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:px-4"
+          >
+            {convidados.map((convidado) => (
+              <figure
+                key={convidado.name}
+                data-carousel-card
+                className="w-[78vw] max-w-[300px] shrink-0 snap-start text-center sm:w-[280px] lg:w-[calc((100%-4.5rem)/4)]"
+              >
+                <div className="relative aspect-[3/4] overflow-hidden rounded-[10px] bg-white">
+                  <img
+                    src={convidado.img}
+                    alt={convidado.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover object-top"
+                  />
                 </div>
-                <figcaption className="mt-4 text-center text-base font-black tracking-widest text-white">
-                  {c.name.toUpperCase()}
+
+                <figcaption className="mt-5 text-[25px] font-bold uppercase leading-tight text-white lg:text-[32px]">
+                  {convidado.name}
                 </figcaption>
               </figure>
             ))}
-            <div className="flex w-[240px] shrink-0 items-center justify-center sm:w-[280px]">
-              <button className="grid h-14 w-14 place-items-center rounded-full border-2 border-white text-white transition hover:bg-white hover:text-orange-band">
-                <ArrowRight className="h-6 w-6" />
-              </button>
-            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={goToNext}
+            aria-label="Próximo convidado"
+            className="absolute right-2 top-[40%] z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white text-white transition hover:bg-white hover:text-orange-band lg:right-4"
+          >
+            <ArrowRight className="h-5 w-5" />
+          </button>
+
           <div className="mt-6 flex justify-center gap-2">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={`h-1 w-8 rounded-full ${i === 0 ? "bg-white" : "bg-white/40"}`} />
+            {indicatorPositions.map((position, index) => (
+              <button
+                key={position}
+                type="button"
+                onClick={() => scrollToPosition(position)}
+                aria-label={`Ir para a posição ${index + 1}`}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  activeIndicator === index
+                    ? "w-8 bg-white"
+                    : "w-5 bg-white/40 hover:bg-white/70"
+                }`}
+              />
             ))}
           </div>
-          <div className="mt-10 flex justify-center">
-            <button className="rounded-full border-2 border-white px-10 py-3 text-sm font-bold tracking-[0.25em] text-white transition hover:bg-white hover:text-orange-band">
+
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={goToNext}
+              className="rounded-full border-2 border-white px-10 py-3 text-sm font-bold tracking-[0.25em] text-white transition hover:bg-white hover:text-orange-band"
+            >
               VER TUDO
             </button>
           </div>
@@ -435,45 +573,82 @@ function Convidados() {
 
 function Curadoria() {
   return (
-    <section id="curadoria">
+    <section id="curadoria" className="font-['Nunito_Sans']">
       <SectionHead title="Curadoria" />
+
       <div className="relative overflow-hidden bg-teal-band py-16">
         <SideLabel>CURADORIA</SideLabel>
-        <img
-          src={carolinaWriting}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 object-cover opacity-30 mix-blend-luminosity"
-        />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[auto_1fr_1fr] lg:items-start lg:px-16">
-          <figure className="max-w-xs">
+
+        {/* Foto completa da Carolina ao fundo */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[50%] lg:block">
+          <img
+            src={carolinaWriting}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="h-full w-full object-contain object-right opacity-30 mix-blend-luminosity"
+          />
+        </div>
+
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[300px_1fr_1fr] lg:items-start lg:px-16">
+          {/* Curador */}
+          <figure className="max-w-[300px]">
             <div className="relative overflow-hidden rounded-xl">
-              <img src={curatorImg} alt="Reynaldo Bessa" width={700} height={900} loading="lazy" className="aspect-[3/4] w-full object-cover" />
+              <img
+                src={curatorImg}
+                alt="Reynaldo Bessa"
+                width={700}
+                height={900}
+                loading="lazy"
+                className="aspect-[3/4] w-full object-cover object-top"
+              />
             </div>
-            <figcaption className="mt-4 text-lg font-black tracking-widest text-white">REYNALDO BESSA</figcaption>
+
+            <figcaption className="mt-4 text-[32px] font-extrabold uppercase leading-tight tracking-wide text-white">
+              Reynaldo Bessa
+            </figcaption>
           </figure>
 
-          <div className="max-w-md text-[15px] leading-relaxed text-white/95">
+          {/* Texto da curadoria */}
+          <div className="max-w-md text-[16px] leading-relaxed text-white/95">
             <p>
-              O Sinesp e a curadoria idealizaram este projeto como um espaço dinâmico de formação continuada e reflexão coletiva.
-              Acima de tudo, prezando pela diversidade e procurando estabelecer um diálogo direto com educadores, pesquisadores,
-              escritores, estudantes, leitores, editores, livreiros e admiradores da literatura em geral.
+              O Sinesp e a curadoria idealizaram este projeto como um espaço
+              dinâmico de formação continuada e reflexão coletiva. Acima de
+              tudo, prezando pela diversidade e procurando estabelecer um
+              diálogo direto com educadores, pesquisadores, escritores,
+              estudantes, leitores, editores, livreiros e admiradores da
+              literatura em geral.
             </p>
-            <p className="mt-4">
-              Com essa configuração, o Sinesp reafirma seu papel na promoção do acesso democrático à educação e à cultura de
-              qualidades, transformando o espaço urbano em um ponto de encontro essencial para a divulgação e a valorização de
-              uma das vozes mais autênticas da nossa literatura.
+
+            <p className="mt-5">
+              Com essa configuração, o Sinesp reafirma seu papel na promoção do
+              acesso democrático à educação e à cultura de qualidades,
+              transformando o espaço urbano em um ponto de encontro essencial
+              para a divulgação e a valorização de uma das vozes mais
+              autênticas da nossa literatura.
             </p>
-            <button className="mt-6 inline-flex items-center gap-3 rounded-full border border-white/80 px-6 py-3 text-xs font-bold tracking-[0.25em] text-white transition hover:bg-white hover:text-teal-band">
-              LEIA A CARTA NA ÍNTEGRA <ArrowRight className="h-4 w-4" />
+
+            <button
+              type="button"
+              className="mt-7 inline-flex items-center gap-3 rounded-full border border-white/80 px-6 py-3 text-xs font-bold tracking-[0.25em] text-white transition duration-300 hover:border-[#B61519] hover:bg-[#B61519] hover:text-white"
+            >
+              LEIA A CARTA NA ÍNTEGRA
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
-          <blockquote className="relative border-l border-white/30 pl-6 font-display text-2xl leading-snug text-white sm:text-3xl">
-            <span className="absolute -left-2 -top-6 font-display text-6xl text-white/40">“</span>
-            Carolina Maria de Jesus: além do quarto lança luz sobre as múltiplas vertentes artísticas da autora mineira que
-            tendem a permanecer em segundo plano.
+          {/* Citação */}
+          <blockquote className="relative border-l border-white/30 pb-4 pl-8 pt-12 text-[28px] font-semibold leading-[1.45] text-white sm:text-[32px]">
+            <span
+              aria-hidden="true"
+              className="absolute -left-2 -top-10 font-serif text-[120px] leading-none text-white/45"
+            >
+              “
+            </span>
+
+            Carolina Maria de Jesus: além do quarto lança luz sobre as múltiplas
+            vertentes artísticas da autora mineira que tendem a permanecer em
+            segundo plano.
           </blockquote>
         </div>
       </div>
@@ -483,10 +658,12 @@ function Curadoria() {
 
 function Mesas() {
   return (
-    <section id="programação">
+    <section id="programação" className="font-['Nunito_Sans']">
       <SectionHead title="Mesas" />
+
       <div className="relative bg-red-band py-16">
         <SideLabel>MESAS</SideLabel>
+
         <div className="mx-auto grid max-w-7xl gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3 lg:px-16">
           {mesas.slice(0, 3).map((m) => (
             <MesaCard key={m.time} {...m} />
@@ -494,7 +671,10 @@ function Mesas() {
 
           <div className="rounded-md bg-black/25 p-2 sm:col-span-2 lg:col-span-1">
             <MesaHeader time="13:10" label="Mesa 2" />
-            <SpeakerRow speakers={[{ name: "Vera Eunice de Jesus", img: author3 }]} desc="Legado e afeto: Carolina em primeira pessoa." />
+            <SpeakerRow
+              speakers={[{ name: "Vera Eunice de Jesus", img: author3 }]}
+              desc="Legado e afeto: Carolina em primeira pessoa."
+            />
           </div>
 
           <div className="rounded-md bg-black/25 p-2 sm:col-span-2">
@@ -531,12 +711,20 @@ function Mesas() {
   );
 }
 
-function MesaHeader({ time, label }: { time: string; label: string }) {
+function MesaHeader({
+  time,
+  label,
+}: {
+  time: string;
+  label: string;
+}) {
   return (
-    <div className="mb-3 flex items-baseline gap-3 px-2 pt-2 text-white">
+    <div className="mb-3 flex items-baseline gap-3 px-2 pt-2 font-['Nunito_Sans'] text-white">
       <span className="text-2xl font-black">{time}</span>
       <span className="text-white/60">|</span>
-      <span className="text-sm uppercase tracking-[0.25em] text-white/90">{label}</span>
+      <span className="text-sm uppercase tracking-[0.25em] text-white/90">
+        {label}
+      </span>
     </div>
   );
 }
@@ -557,19 +745,29 @@ function MesaCard({
   wide?: boolean;
 }) {
   return (
-    <article className="rounded-md bg-black/25 p-2">
+    <article className="rounded-md bg-black/25 p-2 font-['Nunito_Sans']">
       <MesaHeader time={time} label={label} />
+
       <div className="overflow-hidden rounded-md">
         <img
           src={img}
           alt={title}
           loading="lazy"
-          className={`w-full bg-black/10 object-contain ${wide ? "aspect-[16/9]" : "aspect-[4/3]"}`}
+          className={`w-full bg-black/10 object-contain ${
+            wide ? "aspect-[16/9]" : "aspect-[4/3]"
+          }`}
         />
       </div>
+
       <div className="p-4">
-        <p className="text-sm font-black tracking-widest text-white">{title.toUpperCase()}</p>
-        <p className="mt-2 text-sm leading-relaxed text-white/90">{desc}</p>
+        <p className="text-sm font-black tracking-widest text-white">
+          {title.toUpperCase()}
+        </p>
+
+        <p className="mt-2 text-sm leading-relaxed text-white/90">
+          {desc}
+        </p>
+
         <div className="mt-4 flex justify-end">
           <button className="grid h-8 w-8 place-items-center rounded-full border border-white/70 text-white transition hover:bg-white hover:text-red-band">
             <Plus className="h-4 w-4" />
@@ -612,8 +810,8 @@ function SpeakerRow({ speakers, desc }: { speakers: { name: string; img: string 
 function Bitita() {
   return (
     <section className="bg-ink py-8">
-      <div className="mx-auto grid max-w-[1500px] gap-0 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch lg:px-10">
-        <div className="rounded-l-2xl bg-purple-band p-8 sm:p-12 lg:p-14">
+      <div className="relative mx-auto grid max-w-[1500px] px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch lg:px-10">
+        <div className="relative z-20 rounded-[10px] bg-purple-band p-8 sm:p-12 lg:-mr-12 lg:p-14">
           <h3 className="font-sans text-4xl font-light uppercase tracking-normal text-white sm:text-5xl lg:text-6xl">
             Espaço Bitita
           </h3>
@@ -653,7 +851,7 @@ function Bitita() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-r-2xl">
+        <div className="relative z-10 overflow-hidden rounded-[10px]">
           <img
             src={bititaImg}
             alt="Homenagem em preto e branco"
@@ -710,21 +908,14 @@ function Livrarias() {
             </div>
           </div>
 
-          <blockquote className="flex min-h-[270px] items-center justify-center gap-7 px-5 text-white/40">
-            <span className="font-serif text-[145px] leading-none text-white/35">
-              “
-            </span>
-
-            <p className="max-w-[290px] text-center font-script text-[47px] leading-[0.88]">
-              Quem inventou
-              <br />
-              a fome
-              <br />
-              são os que
-              <br />
-              comem.
-            </p>
-          </blockquote>
+          <div className="flex min-h-[220px] -translate-y-6 items-center justify-center px-5">
+          <img
+            src={fraseLivrariasImg}
+            alt="Quem inventou a fome são os que comem"
+            loading="lazy"
+            className="h-auto w-full max-w-[420px] object-contain opacity-60 mix-blend-screen"
+          />
+        </div>
         </div>
 
         {/* Imagem direita */}
@@ -742,25 +933,60 @@ function Livrarias() {
 }
 
 function Catadora() {
+  const cardColors = [
+    "bg-[#f5a400]/55",
+    "bg-[#b96d00]/58",
+    "bg-[#8f5700]/58",
+    "bg-[#6d4200]/62",
+  ];
+
   return (
-    <section className="bg-ink py-16">
+    <section className="bg-ink py-16 font-['Nunito_Sans']">
       <div className="mx-auto max-w-7xl px-6 lg:px-16">
-        <h3 className="text-center font-display text-3xl uppercase tracking-[0.28em] text-white sm:text-4xl">
+        <h3 className="mb-12 text-center font-['Nunito_Sans'] text-[34px] font-light uppercase tracking-[0.14em] text-white sm:text-[44px] lg:text-[54px]">
           Espaço Catadora de Palavras
         </h3>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {catadora.map((c) => (
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {catadora.map((c, index) => (
             <article
               key={c.time}
-              className="group relative h-[540px] overflow-hidden rounded-lg"
+              className="group relative h-[540px] overflow-hidden rounded-[10px] bg-black"
             >
+              {/* Use aqui uma versão da fotografia sem textos embutidos */}
               <img
                 src={c.img}
                 alt={c.who}
                 loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover object-center"
+                className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 ease-out group-hover:scale-[1.06]"
               />
-              <div className="relative min-h-[380px]" />
+
+              {/* Camada de cor */}
+              <div
+                className={`absolute inset-0 ${cardColors[index]} transition duration-500 group-hover:opacity-75`}
+              />
+
+              {/* Escurecimento suave para melhorar a leitura */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/20 transition duration-500 group-hover:from-black/15 group-hover:to-black/35" />
+
+              {/* Horário e título em texto HTML */}
+              <div className="absolute left-6 right-6 top-6 z-10">
+                <p className="text-[38px] font-light leading-none text-white">
+                  {c.time}
+                </p>
+
+                <h4 className="mt-3 max-w-[210px] font-['Nunito_Sans'] text-[21px] font-extrabold uppercase leading-[1.1] text-white">
+                  {c.title}
+                </h4>
+              </div>
+
+              {/* Nome na vertical */}
+              <p className="absolute bottom-5 right-4 z-10 origin-bottom-right rotate-180 whitespace-nowrap font-['Nunito_Sans'] text-[30px] font-light uppercase leading-none text-white [writing-mode:vertical-rl]">
+                {c.who}
+              </p>
+
+              {/* Efeito adicional no hover */}
+              <div className="pointer-events-none absolute inset-0 z-20 rounded-[10px] border border-white/0 transition duration-300 group-hover:border-white/70 group-hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)]" />
             </article>
           ))}
         </div>
@@ -774,20 +1000,14 @@ function Footer() {
     <footer className="bg-ink px-6 pb-10 lg:px-16">
       <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/25 p-8 sm:p-12">
         <div className="grid gap-10 lg:grid-cols-[auto_1fr_1.2fr_auto_auto] lg:items-start">
-          <div className="flex flex-col items-center gap-2 text-center text-white">
-            <div className="grid h-24 w-24 place-items-center rounded-full border-2 border-white">
-              <BookOpen className="h-10 w-10" strokeWidth={1.4} />
-            </div>
-
-            <p className="mt-2 text-xs font-black tracking-[0.25em]">
-              ENCONTRO
-            </p>
-            <p className="text-xs font-black tracking-[0.25em]">
-              LITERÁRIO
-            </p>
-            <p className="text-xs font-black tracking-[0.25em]">2026</p>
+          <div className="flex items-center justify-center">
+            <img
+              src={encontro2026}
+              alt="Encontro Literário 2026"
+              loading="lazy"
+              className="h-auto w-[170px] object-contain"
+            />
           </div>
-
           <div className="text-sm text-white/80">
             <p className="mb-4 text-xs font-semibold tracking-[0.3em] text-white/60">
               NAVEGAÇÃO
@@ -827,7 +1047,7 @@ function Footer() {
 
             <div className="flex min-h-24 items-center justify-center">
               <img
-                src={formaCertaLogo}
+                src={formacerta}
                 alt="Forma Certa"
                 loading="lazy"
                 className="h-24 w-28 object-contain"
@@ -842,7 +1062,7 @@ function Footer() {
 
             <div className="flex min-h-24 items-center justify-center">
               <img
-                src={sinespLogo}
+                src={sinespsvg}
                 alt="SINESP"
                 loading="lazy"
                 className="h-20 w-28 object-contain"
@@ -883,34 +1103,70 @@ function Footer() {
 
 function Autografos() {
   return (
-    <section className="bg-ink py-16">
+    <section className="bg-ink py-16 font-sans">
       <div className="mx-auto max-w-7xl px-6 lg:px-16">
         <h3 className="mb-10 text-center font-sans text-[58px] font-light uppercase text-white">
-  Sessões de Autógrafo
-</h3>
+          Sessões de Autógrafo
+        </h3>
+
         <div className="relative grid gap-8 lg:grid-cols-[1fr_auto]">
           <div className="relative">
-            <span className="side-label absolute -left-2 top-0 hidden sm:block">AUTÓGRAFOS</span>
-            <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-x-4 gap-y-3 px-2 pl-10 text-white sm:gap-x-6">
-              <div className="text-xs font-black tracking-[0.25em] text-white/80">HORÁRIO</div>
-              <div className="text-xs font-black tracking-[0.25em] text-white/80">LOCAL</div>
-              <div className="text-xs font-black tracking-[0.25em] text-white/80">AUTOR/A</div>
-              <div className="text-xs font-black tracking-[0.25em] text-white/80">TETO</div>
+            <span className="side-label absolute -left-2 top-0 hidden sm:block">
+              AUTÓGRAFOS
+            </span>
+
+            <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-x-4 gap-y-3 px-2 pl-10 text-white sm:gap-x-6 font-sans">
+
+              <div className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                HORÁRIO
+              </div>
+
+              <div className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                LOCAL
+              </div>
+
+              <div className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                AUTOR/A
+              </div>
+
+              <div className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                TETO
+              </div>
+
               {autografos.map((a, i) => (
                 <div key={i} className="contents">
-                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-sm font-bold">{a.time}</div>
-                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-widest text-white/80">{a.local}</div>
-                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-sm font-black tracking-widest">{a.autor.toUpperCase()}</div>
-                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-widest text-white/80">20 min.</div>
+
+                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-sm font-semibold">
+                    {a.time}
+                  </div>
+
+                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-xs uppercase font-medium text-white/80">
+                    {a.local}
+                  </div>
+
+                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-sm font-bold uppercase">
+                    {a.autor}
+                  </div>
+
+                  <div className="flex items-center rounded-full border border-white/40 bg-white/[0.03] px-4 py-2 text-xs uppercase text-white/80">
+                    20 min.
+                  </div>
+
                 </div>
               ))}
             </div>
           </div>
-          <aside className="flex w-full max-w-xs flex-col items-center gap-4 rounded-2xl bg-red-band p-8 text-center text-white lg:w-64">
+
+          <aside className="flex w-full max-w-xs flex-col items-center gap-4 rounded-2xl bg-red-band p-8 text-center text-white font-sans lg:w-64">
             <Ticket className="h-10 w-10" strokeWidth={1.5} />
-            <p className="text-sm font-black tracking-[0.3em]">REGRAS</p>
+
+            <p className="text-sm font-bold uppercase tracking-[0.25em]">
+              REGRAS
+            </p>
+
             <p className="text-sm leading-relaxed text-white/90">
-              Serão distribuídas 30 senhas 30 minutos antes de cada sessão, no local indicado.
+              Serão distribuídas 30 senhas 30 minutos antes de cada sessão,
+              no local indicado.
             </p>
           </aside>
         </div>
