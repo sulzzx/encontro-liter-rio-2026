@@ -54,7 +54,7 @@ import edemilsonEquipeImg from "@/assets/edemilson-tavares.png";
 import hectorEquipeImg from "@/assets/hector-boss.png";
 import formaCertaLogo from "@/assets/forma-certa.png";
 import sinespLogo from "@/assets/sinesp.png";
-import logo_evento from "@/assets/logo_evento.png";
+import logo_evento from "@/assets/logo-evento.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
